@@ -80,7 +80,7 @@ Socket 通信实现步骤
 ```java
 // 1. 创建 ServerSocket 对象，绑定监听端口
 ServerSocket serverSocket = new ServerSocket(8888);
-System.out.println("服务器已经启动，开始侦听客户端的连接");
+System.out.println("***服务器已经启动，开始侦听客户端的连接***");
 // 2. 通过 accept() 方法监听客户端请求
 Socket socket = serverSocket.accept();
 // 3. 连接建立后，通过输入流读取客户端发送的请求信息
@@ -152,7 +152,7 @@ socket.close();
 ```java
 // 1. 创建 ServerSocket 对象，绑定监听端口
 ServerSocket serverSocket = new ServerSocket(8888);
-System.out.println("服务器已经启动，开始侦听客户端的连接");
+System.out.println("***服务器已经启动，开始侦听客户端的连接***");
 int count = 0;
 // 2. 通过 accept() 方法监听客户端请求
 Socket socket;
@@ -190,12 +190,53 @@ UDP 协议以**数据报**作为数据传输的载体。
 3. 接受客户端发送的数据信息
 4. 读取数据
 
+```java
+// 1. 创建 DatagramSocket，指定端口号
+DatagramSocket socket = new DatagramSocket(8888);
+// 2. 创建 DatagramPacket
+byte[] data = new byte[1024];
+DatagramPacket packet = new DatagramPacket(data, data.length);
+System.out.println("***服务器已经启动，开始侦听客户端的连接***");
+// 3. 接受客户端发送的数据信息
+// 此方法在接收到数据之前按一直会保持阻塞
+socket.receive(packet);
+// 4. 读取数据
+String info = new String(data, 0, packet.getLength());
+System.out.println("我是服务器，客户端说：" + info);
+// 服务器向客户端进行响应
+InetAddress address = packet.getAddress();
+int port = packet.getPort();
+byte[] resp = "你好，这是服务器对客户端的响应".getBytes();
+DatagramPacket respPacket = new DatagramPacket(resp, resp.length, address, port);
+socket.send(respPacket);
+socket.close();
+```
+
 客户端
 
 1. 定义发送信息
 2. 创建 `DatagramPacket`，包含所要发送的信息
 3. 创建 `DatagramSocket`
 4. 发送数据
+
+```java
+// 1. 定义发送信息
+InetAddress address = InetAddress.getLocalHost();
+int port = 8888;
+byte[] data = "user:zhangsan;passwd:888888".getBytes();
+// 2. 创建 DatagramPacket，包含所要发送的信息
+DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
+// 3. 创建 DatagramSocket
+DatagramSocket socket = new DatagramSocket();
+// 4. 发送数据
+socket.send(packet);
+// 客户端接收服务器端的响应
+byte[] resp = new byte[1024];
+DatagramPacket respPacket = new DatagramPacket(resp, resp.length);
+socket.receive(respPacket);
+String info = new String(resp, 0, respPacket.getLength());
+System.out.println("我是客户端，服务器响应的信息为：" + info);
+```
 
 ## 6. 相关问题
 
